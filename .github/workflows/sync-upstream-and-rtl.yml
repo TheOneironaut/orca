@@ -1,5 +1,7 @@
 name: Sync upstream and RTL patch
 
+# Keep the fork current, preserve the rolling download banner, and rebase the
+# minimal RTL patch branch so every synchronized revision is rebuilt and tested.
 on:
   push:
     branches:
