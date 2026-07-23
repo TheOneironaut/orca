@@ -1,0 +1,43 @@
+name: Sync upstream and RTL patch
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-and-rtl
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge upstream main into fork main
+        run: |
+          git remote add upstream https://github.com/stablyai/orca.git
+          git fetch upstream main
+          git merge --no-edit upstream/main
+          git push origin main
+
+      - name: Rebase RTL patch branch onto updated main
+        run: |
+          git fetch origin fix/native-chat-rtl
+          git switch fix/native-chat-rtl
+          git rebase origin/main
+          git push origin fix/native-chat-rtl --force-with-lease
