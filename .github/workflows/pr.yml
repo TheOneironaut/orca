@@ -87,7 +87,11 @@ jobs:
       - name: Verify bundled skill guides
         run: pnpm run verify:bundled-skill-guides
 
+      # This manifest derives official package identities from the canonical
+      # repository's release/tag history. A fork has a different release graph,
+      # so the canonical verification is meaningful only in stablyai/orca.
       - name: Verify skill freshness manifest
+        if: github.repository == 'stablyai/orca'
         run: pnpm run verify:skill-bundle-manifest
 
       # Why: project-owned type declarations must live in .ts so tsc
