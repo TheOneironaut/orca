@@ -2,6 +2,9 @@ name: Build RTL Windows installer
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - fix/native-chat-rtl
@@ -15,7 +18,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: build-rtl-windows
+  group: build-rtl-windows-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -25,6 +28,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     runs-on: windows-latest
     timeout-minutes: 90
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
     steps:
       - name: Check out RTL branch
@@ -54,7 +59,9 @@ jobs:
 
       - name: Install dependencies
         shell: pwsh
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Build native Windows helpers
         shell: pwsh
@@ -70,8 +77,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path release | Out-Null
           $installer = Get-ChildItem -Path dist -Recurse -File -Filter "orca-windows-setup.exe" | Select-Object -First 1
           if (-not $installer) {
-            Write-Error "Could not find dist/orca-windows-setup.exe"
-            exit 1
+            throw "Could not find dist/orca-windows-setup.exe"
           }
           Copy-Item $installer.FullName release/orca-rtl-windows-setup.exe
           $hash = (Get-FileHash release/orca-rtl-windows-setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -85,17 +91,15 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Replace rolling latest release
+      - name: Publish rolling latest release
+        if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RTL_SHA: ${{ steps.source.outputs.sha }}
           RTL_SHORT_SHA: ${{ steps.source.outputs.short_sha }}
         run: |
-          gh release delete rtl-latest --yes --cleanup-tag 2>$null
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "No previous rtl-latest release found; creating the first one."
-          }
+          $ErrorActionPreference = 'Stop'
 
           git tag -f rtl-latest $env:RTL_SHA
           git push origin refs/tags/rtl-latest --force
@@ -109,10 +113,23 @@ jobs:
           Download ``orca-rtl-windows-setup.exe`` below. Windows SmartScreen may warn because this community build is not signed with Orca's official certificate.
           "@
 
-          gh release create rtl-latest `
-            release/orca-rtl-windows-setup.exe `
-            release/orca-rtl-windows-setup.exe.sha256 `
-            --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
-            --notes $notes `
-            --prerelease `
-            --target $env:RTL_SHA
+          gh release view rtl-latest *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit rtl-latest `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease
+            gh release upload rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --clobber
+          } else {
+            $global:LASTEXITCODE = 0
+            gh release create rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease `
+              --target $env:RTL_SHA
+          }
