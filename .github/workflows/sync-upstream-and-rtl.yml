@@ -49,19 +49,21 @@ jobs:
           text = path.read_text(encoding="utf-8")
           start = "<!-- ORCA_RTL_DOWNLOAD_START -->"
           end = "<!-- ORCA_RTL_DOWNLOAD_END -->"
-          block = f'''{start}
-          <p align="center">
-            <strong>Hebrew / Arabic Native Chat build for Windows:</strong><br/>
-            <a href="https://github.com/TheOneironaut/orca/releases/download/rtl-latest/orca-rtl-windows-setup.exe"><strong>Download the latest Orca RTL Windows installer</strong></a>
-            · <a href="https://github.com/TheOneironaut/orca/releases/tag/rtl-latest">Release details &amp; SHA-256</a>
-          </p>
-          {end}
-          '''
+          block = "\n".join([
+              start,
+              '<p align="center">',
+              '  <strong>Hebrew / Arabic Native Chat build for Windows:</strong><br/>',
+              '  <a href="https://github.com/TheOneironaut/orca/releases/download/rtl-latest/orca-rtl-windows-setup.exe"><strong>Download the latest Orca RTL Windows installer</strong></a>',
+              '  · <a href="https://github.com/TheOneironaut/orca/releases/tag/rtl-latest">Release details &amp; SHA-256</a>',
+              '</p>',
+              end,
+              '',
+          ])
 
           if start in text and end in text:
               before, remainder = text.split(start, 1)
               _, after = remainder.split(end, 1)
-              updated = before + block + after
+              updated = before + block + after.lstrip("\n")
           else:
               anchor = "</h1>"
               if anchor not in text:
