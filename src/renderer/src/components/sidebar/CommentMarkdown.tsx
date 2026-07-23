@@ -221,11 +221,16 @@ const CommentMarkdown = React.memo(
     return (
       <div
         ref={ref}
+        dir="auto"
         className={cn(
           // Reset inline-code pill styles when <code> is inside a <pre> block.
           // The descendant selector (pre code) has higher specificity than the
           // direct utility classes on <code>, so these overrides win reliably.
           '[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none',
+          // Content direction follows the first strong character while each
+          // paragraph gets independent BiDi ordering. Code remains isolated LTR.
+          'text-start [unicode-bidi:plaintext] [&_p]:[unicode-bidi:plaintext] [&_li]:[unicode-bidi:plaintext] [&_blockquote]:[unicode-bidi:plaintext]',
+          '[&_pre]:!text-left [&_pre]:[direction:ltr] [&_pre]:[unicode-bidi:isolate] [&_pre_code]:[direction:ltr] [&_code]:[unicode-bidi:isolate]',
           'min-w-0 max-w-full [overflow-wrap:anywhere]',
           className
         )}
