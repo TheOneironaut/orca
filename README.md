@@ -9,8 +9,6 @@
   · <a href="https://github.com/TheOneironaut/orca/releases/tag/rtl-latest">Release details &amp; SHA-256</a>
 </p>
 <!-- ORCA_RTL_DOWNLOAD_END -->
-
-
 <p align="center">
   <a href="https://github.com/stablyai/orca"><img src="https://img.shields.io/github/stars/stablyai/orca?style=flat&amp;label=%E2%98%85&amp;color=08C" alt="GitHub stars" /></a>
   <a href="https://github.com/stablyai/orca/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
