@@ -159,7 +159,18 @@ jobs:
         run: node config/scripts/install-electron-package-binary.mjs
 
       - name: Test
-        run: pnpm test
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee "$RUNNER_TEMP/orca-test.log"
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-test-log-${{ github.run_id }}
+          path: ${{ runner.temp }}/orca-test.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Build unpacked app
         run: pnpm build:unpack
