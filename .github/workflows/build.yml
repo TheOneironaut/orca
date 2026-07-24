@@ -86,7 +86,8 @@ jobs:
       - name: Already current
         if: steps.upstream.outputs.build != 'true'
         shell: pwsh
-        run: "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
+        run: |
+          "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
 
       - name: Fetch exact Orca commit
         if: steps.upstream.outputs.build == 'true'
