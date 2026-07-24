@@ -1,0 +1,26 @@
+name: RTL branch CI
+
+on:
+  push:
+    branches:
+      - fix/native-chat-rtl
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rtl-branch-ci
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    uses: ./.github/workflows/rtl-verify.yml
+    permissions:
+      contents: read
+
+  build:
+    needs: verify
+    uses: ./.github/workflows/build-rtl-windows.yml
+    permissions:
+      contents: write
