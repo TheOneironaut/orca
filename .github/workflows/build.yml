@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: orca-rtl-minimal-builder
+  group: orca-rtl-minimal-builder-v2
   cancel-in-progress: false
 
 jobs:
@@ -43,16 +43,11 @@ jobs:
           FORCE_BUILD: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.force) }}
         run: |
           $ErrorActionPreference = "Stop"
-
           $line = git ls-remote https://github.com/stablyai/orca.git refs/heads/main
-          if (-not $line) {
-            throw "Unable to resolve stablyai/orca main."
-          }
+          if (-not $line) { throw "Unable to resolve stablyai/orca main." }
 
           $sha = ($line -split "\s+")[0]
-          $shortSha = $sha.Substring(0, 9)
           $shouldBuild = $true
-
           if ($env:FORCE_BUILD -ne "true") {
             $body = gh release view rtl-latest --repo $env:GITHUB_REPOSITORY --json body --jq .body 2>$null
             if ($LASTEXITCODE -eq 0 -and $body -like "*Upstream commit: $sha*") {
@@ -62,7 +57,7 @@ jobs:
           }
 
           "sha=$sha" >> $env:GITHUB_OUTPUT
-          "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
+          "short_sha=$($sha.Substring(0, 9))" >> $env:GITHUB_OUTPUT
           "build=$($shouldBuild.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 
       - name: Record build start
@@ -77,13 +72,12 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path .github | Out-Null
           $status = if ($env:BUILD_REQUIRED -eq "true") { "running" } else { "up-to-date" }
-          $payload = [ordered]@{
+          [ordered]@{
             status = $status
             upstream_commit = $env:UPSTREAM_SHA
             run_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
             updated_at = (Get-Date).ToUniversalTime().ToString("o")
-          } | ConvertTo-Json
-          $payload | Set-Content -Encoding utf8 .github\build-status.json
+          } | ConvertTo-Json | Set-Content -Encoding utf8 .github\build-status.json
 
           git add .github/build-status.json
           git commit -m "ci: record Orca RTL build start"
@@ -92,8 +86,7 @@ jobs:
       - name: Already current
         if: steps.upstream.outputs.build != 'true'
         shell: pwsh
-        run: |
-          "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
+        run: "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
 
       - name: Fetch exact Orca commit
         if: steps.upstream.outputs.build == 'true'
@@ -107,10 +100,8 @@ jobs:
           git -C orca-src remote add origin https://github.com/stablyai/orca.git
           git -C orca-src fetch --depth 1 origin $env:UPSTREAM_SHA
           git -C orca-src checkout --detach FETCH_HEAD
-
-          $actual = git -C orca-src rev-parse HEAD
-          if ($actual -ne $env:UPSTREAM_SHA) {
-            throw "Checked out $actual, expected $env:UPSTREAM_SHA."
+          if ((git -C orca-src rev-parse HEAD) -ne $env:UPSTREAM_SHA) {
+            throw "The exact upstream commit was not checked out."
           }
 
       - name: Apply RTL patch
@@ -156,13 +147,23 @@ jobs:
             src/renderer/src/components/sidebar/CommentMarkdown.tsx
           pnpm typecheck
 
+      - name: Build native Windows helpers
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        working-directory: orca-src
+        run: |
+          pnpm run build:native 2>&1 | Tee-Object -FilePath ..\build-native.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { exit $code }
+
       - name: Build Windows installer
         if: steps.upstream.outputs.build == 'true'
         shell: pwsh
         working-directory: orca-src
         run: |
-          pnpm run build:native
-          pnpm run build:win
+          pnpm run build:win 2>&1 | Tee-Object -FilePath ..\build-win.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { exit $code }
 
       - name: Prepare release files
         if: steps.upstream.outputs.build == 'true'
@@ -173,20 +174,13 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force -Path release | Out-Null
-
-          $installer = Get-ChildItem -Path orca-src\dist -Recurse -File -Filter "orca-windows-setup.exe" |
-            Select-Object -First 1
-          if (-not $installer) {
-            throw "Could not find orca-windows-setup.exe."
-          }
+          $installer = Get-ChildItem orca-src\dist -Recurse -File -Filter "orca-windows-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw "Could not find orca-windows-setup.exe." }
 
           Copy-Item $installer.FullName release\orca-rtl-windows-setup.exe
           $hash = (Get-FileHash release\orca-rtl-windows-setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$hash  orca-rtl-windows-setup.exe" |
-            Set-Content -Encoding ascii release\orca-rtl-windows-setup.exe.sha256
-          $env:UPSTREAM_SHA |
-            Set-Content -Encoding ascii release\upstream-commit.txt
-
+          "$hash  orca-rtl-windows-setup.exe" | Set-Content -Encoding ascii release\orca-rtl-windows-setup.exe.sha256
+          $env:UPSTREAM_SHA | Set-Content -Encoding ascii release\upstream-commit.txt
           $package = Get-Content orca-src\package.json -Raw | ConvertFrom-Json
           "version=$($package.version)" >> $env:GITHUB_OUTPUT
           "sha256=$hash" >> $env:GITHUB_OUTPUT
@@ -202,7 +196,6 @@ jobs:
           INSTALLER_SHA256: ${{ steps.release.outputs.sha256 }}
         run: |
           $ErrorActionPreference = "Stop"
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -f rtl-latest $env:GITHUB_SHA
@@ -223,37 +216,12 @@ jobs:
 
           gh release view rtl-latest --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release edit rtl-latest `
-              --repo $env:GITHUB_REPOSITORY `
-              --title $title `
-              --notes $notes `
-              --prerelease
-            gh release upload rtl-latest `
-              release\orca-rtl-windows-setup.exe `
-              release\orca-rtl-windows-setup.exe.sha256 `
-              release\upstream-commit.txt `
-              --repo $env:GITHUB_REPOSITORY `
-              --clobber
+            gh release edit rtl-latest --repo $env:GITHUB_REPOSITORY --title $title --notes $notes --prerelease
+            gh release upload rtl-latest release\orca-rtl-windows-setup.exe release\orca-rtl-windows-setup.exe.sha256 release\upstream-commit.txt --repo $env:GITHUB_REPOSITORY --clobber
           } else {
             $global:LASTEXITCODE = 0
-            gh release create rtl-latest `
-              release\orca-rtl-windows-setup.exe `
-              release\orca-rtl-windows-setup.exe.sha256 `
-              release\upstream-commit.txt `
-              --repo $env:GITHUB_REPOSITORY `
-              --target $env:GITHUB_SHA `
-              --title $title `
-              --notes $notes `
-              --prerelease
+            gh release create rtl-latest release\orca-rtl-windows-setup.exe release\orca-rtl-windows-setup.exe.sha256 release\upstream-commit.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title $title --notes $notes --prerelease
           }
-
-          @"
-          ### Published Orca RTL
-
-          - Upstream version: ``$env:UPSTREAM_VERSION``
-          - Upstream commit: ``$env:UPSTREAM_SHA``
-          - Installer SHA-256: ``$env:INSTALLER_SHA256``
-          "@ | Add-Content $env:GITHUB_STEP_SUMMARY
 
       - name: Record final status
         if: always()
@@ -266,25 +234,36 @@ jobs:
           $ErrorActionPreference = "Stop"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git fetch origin main
           git switch -C build-status-work origin/main
 
           $status = $env:JOB_STATUS
-          if ($status -eq "success" -and $env:BUILD_REQUIRED -ne "true") {
-            $status = "up-to-date"
-          }
-
-          $payload = [ordered]@{
+          if ($status -eq "success" -and $env:BUILD_REQUIRED -ne "true") { $status = "up-to-date" }
+          [ordered]@{
             status = $status
             upstream_commit = $env:UPSTREAM_SHA
             run_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
             updated_at = (Get-Date).ToUniversalTime().ToString("o")
-          } | ConvertTo-Json
-          $payload | Set-Content -Encoding utf8 .github\build-status.json
+          } | ConvertTo-Json | Set-Content -Encoding utf8 .github\build-status.json
 
-          git add .github/build-status.json
-          if (-not (git diff --cached --quiet)) {
+          $failureLog = ".github\last-build.log"
+          if ($status -eq "failure") {
+            $chunks = @()
+            foreach ($path in @("build-native.log", "build-win.log")) {
+              if (Test-Path $path) {
+                $chunks += "===== $path ====="
+                $chunks += Get-Content $path -Tail 250
+              }
+            }
+            if ($chunks.Count -eq 0) { $chunks = @("No captured build log was available.") }
+            $chunks | Set-Content -Encoding utf8 $failureLog
+          } elseif (Test-Path $failureLog) {
+            Remove-Item $failureLog
+          }
+
+          git add -A .github
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
             git commit -m "ci: record Orca RTL build $status"
             git push origin HEAD:main
           }
