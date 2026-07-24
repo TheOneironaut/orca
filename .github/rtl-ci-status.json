@@ -1,10 +1,10 @@
 {
   "sha": "b958e004101948efa06cda8eb7d5c70b1ef39a28",
   "conclusion": "failure",
-  "verify": "cancelled",
-  "build": "cancelled",
-  "run_id": "30074687442",
+  "verify": "success",
+  "build": "failure",
+  "run_id": "30075322765",
   "run_attempt": "1",
-  "run_url": "https://github.com/TheOneironaut/orca/actions/runs/30074687442",
-  "updated_at": "2026-07-24T07:24:21Z"
+  "run_url": "https://github.com/TheOneironaut/orca/actions/runs/30075322765",
+  "updated_at": "2026-07-24T07:50:50Z"
 }
