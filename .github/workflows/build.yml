@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: orca-rtl-minimal-builder-v2
+  group: orca-rtl-minimal-builder-v3
   cancel-in-progress: false
 
 jobs:
@@ -162,7 +162,17 @@ jobs:
         shell: pwsh
         working-directory: orca-src
         run: |
-          pnpm run build:win 2>&1 | Tee-Object -FilePath ..\build-win.log
+          $log = "..\build-win.log"
+
+          pnpm run build:desktop 2>&1 | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { exit $code }
+
+          pnpm run ensure:electron-runtime 2>&1 | Tee-Object -FilePath $log -Append
+          $code = $LASTEXITCODE
+          if ($code -ne 0) { exit $code }
+
+          pnpm exec electron-builder --config config/electron-builder.config.cjs --win --publish never 2>&1 | Tee-Object -FilePath $log -Append
           $code = $LASTEXITCODE
           if ($code -ne 0) { exit $code }
 
