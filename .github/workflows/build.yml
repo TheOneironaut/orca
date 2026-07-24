@@ -1,0 +1,228 @@
+name: Build Orca RTL
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even when the upstream commit has already been published
+        required: false
+        type: boolean
+        default: true
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/build.yml
+      - patches/native-chat-rtl.patch
+
+permissions:
+  contents: write
+
+concurrency:
+  group: orca-rtl-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - name: Check out builder
+        uses: actions/checkout@v6
+
+      - name: Check latest upstream revision
+        id: upstream
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_BUILD: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.force) }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $line = git ls-remote https://github.com/stablyai/orca.git refs/heads/main
+          if (-not $line) {
+            throw "Unable to resolve stablyai/orca main."
+          }
+
+          $sha = ($line -split "\s+")[0]
+          $shortSha = $sha.Substring(0, 9)
+          $shouldBuild = $true
+
+          if ($env:FORCE_BUILD -ne "true") {
+            $body = gh release view rtl-latest --repo $env:GITHUB_REPOSITORY --json body --jq .body 2>$null
+            if ($LASTEXITCODE -eq 0 -and $body -like "*Upstream commit: $sha*") {
+              $shouldBuild = $false
+            }
+            $global:LASTEXITCODE = 0
+          }
+
+          "sha=$sha" >> $env:GITHUB_OUTPUT
+          "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
+          "build=$($shouldBuild.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+
+      - name: No upstream update
+        if: steps.upstream.outputs.build != 'true'
+        shell: pwsh
+        run: |
+          "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
+
+      - name: Clone Orca
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          git clone --depth 1 https://github.com/stablyai/orca.git orca-src
+          $actual = git -C orca-src rev-parse HEAD
+          if ($actual -ne $env:UPSTREAM_SHA) {
+            throw "Cloned $actual, expected $env:UPSTREAM_SHA."
+          }
+
+      - name: Apply RTL patch
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $patch = Join-Path $env:GITHUB_WORKSPACE "patches\native-chat-rtl.patch"
+          git -C orca-src apply --check $patch
+          git -C orca-src apply $patch
+          git -C orca-src diff --check
+
+      - name: Set up pnpm
+        if: steps.upstream.outputs.build == 'true'
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.24.0
+          run_install: false
+
+      - name: Set up Node.js
+        if: steps.upstream.outputs.build == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: orca-src/package.json
+          cache: pnpm
+          cache-dependency-path: orca-src/pnpm-lock.yaml
+
+      - name: Install dependencies
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        working-directory: orca-src
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
+
+      - name: Validate patched source
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        working-directory: orca-src
+        run: |
+          pnpm exec oxlint --format github `
+            src/renderer/src/components/native-chat/NativeChatComposerField.tsx `
+            src/renderer/src/components/sidebar/CommentMarkdown.tsx
+          pnpm typecheck
+
+      - name: Build Windows installer
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        working-directory: orca-src
+        run: |
+          pnpm run build:native
+          pnpm run build:win
+
+      - name: Prepare release files
+        if: steps.upstream.outputs.build == 'true'
+        id: release
+        shell: pwsh
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+
+          $installer = Get-ChildItem -Path orca-src\dist -Recurse -File -Filter "orca-windows-setup.exe" |
+            Select-Object -First 1
+          if (-not $installer) {
+            throw "Could not find orca-windows-setup.exe."
+          }
+
+          Copy-Item $installer.FullName release\orca-rtl-windows-setup.exe
+          $hash = (Get-FileHash release\orca-rtl-windows-setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  orca-rtl-windows-setup.exe" |
+            Set-Content -Encoding ascii release\orca-rtl-windows-setup.exe.sha256
+          $env:UPSTREAM_SHA |
+            Set-Content -Encoding ascii release\upstream-commit.txt
+
+          $package = Get-Content orca-src\package.json -Raw | ConvertFrom-Json
+          "version=$($package.version)" >> $env:GITHUB_OUTPUT
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
+
+      - name: Publish rolling release
+        if: steps.upstream.outputs.build == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+          UPSTREAM_SHORT_SHA: ${{ steps.upstream.outputs.short_sha }}
+          UPSTREAM_VERSION: ${{ steps.release.outputs.version }}
+          INSTALLER_SHA256: ${{ steps.release.outputs.sha256 }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f rtl-latest $env:GITHUB_SHA
+          git push origin refs/tags/rtl-latest --force
+
+          $title = "Orca RTL for Windows - $env:UPSTREAM_VERSION ($env:UPSTREAM_SHORT_SHA)"
+          $notes = @"
+          Automated unsigned Windows build of Orca with Native Chat RTL support.
+
+          Upstream version: $env:UPSTREAM_VERSION
+          Upstream commit: $env:UPSTREAM_SHA
+          Builder commit: $env:GITHUB_SHA
+          Installer SHA-256: $env:INSTALLER_SHA256
+
+          The only source modification is the patch in patches/native-chat-rtl.patch.
+          Windows SmartScreen may warn because this community build is unsigned.
+          "@
+
+          gh release view rtl-latest --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit rtl-latest `
+              --repo $env:GITHUB_REPOSITORY `
+              --title $title `
+              --notes $notes `
+              --prerelease
+            gh release upload rtl-latest `
+              release\orca-rtl-windows-setup.exe `
+              release\orca-rtl-windows-setup.exe.sha256 `
+              release\upstream-commit.txt `
+              --repo $env:GITHUB_REPOSITORY `
+              --clobber
+          } else {
+            $global:LASTEXITCODE = 0
+            gh release create rtl-latest `
+              release\orca-rtl-windows-setup.exe `
+              release\orca-rtl-windows-setup.exe.sha256 `
+              release\upstream-commit.txt `
+              --repo $env:GITHUB_REPOSITORY `
+              --target $env:GITHUB_SHA `
+              --title $title `
+              --notes $notes `
+              --prerelease
+          }
+
+          $summary = @"
+          ### Published Orca RTL
+
+          - Upstream version: ``$env:UPSTREAM_VERSION``
+          - Upstream commit: ``$env:UPSTREAM_SHA``
+          - Installer SHA-256: ``$env:INSTALLER_SHA256``
+          "@
+          $summary | Add-Content $env:GITHUB_STEP_SUMMARY
