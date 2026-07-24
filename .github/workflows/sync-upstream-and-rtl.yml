@@ -1,9 +1,8 @@
 name: Sync upstream and RTL patch
 
-# Keep the fork current, rebase the minimal RTL branch, verify it, and only then
-# publish a Windows installer. Fork-owned files are reapplied on top of the exact
-# upstream tip, so README or workflow changes upstream cannot create merge conflicts.
-# The twice-hourly schedule bounds normal upstream lag; manual runs remain available.
+# Keep the fork current, rebase the minimal RTL branch, then explicitly dispatch
+# the standalone RTL validation workflow. workflow_dispatch is used because
+# pushes made with GITHUB_TOKEN do not recursively start ordinary push workflows.
 on:
   push:
     branches:
@@ -22,6 +21,7 @@ on:
         default: false
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -32,9 +32,6 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    outputs:
-      changed: ${{ steps.rebase.outputs.changed }}
-      rtl_sha: ${{ steps.rebase.outputs.sha }}
 
     steps:
       - name: Check out main
@@ -150,42 +147,35 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Summarize synchronized revision
+      - name: Dispatch RTL branch CI
+        if: steps.rebase.outputs.changed == 'true' || inputs.force_rebuild == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RTL_SHA: ${{ steps.rebase.outputs.sha }}
+        run: |
+          gh workflow run rtl-branch-ci.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main
+
+          {
+            echo "### Fork synchronization complete"
+            echo
+            echo "- Main updated from upstream: \`${{ steps.main_sync.outputs.changed }}\`"
+            echo "- RTL commit: \`$RTL_SHA\`"
+            echo "- RTL branch changed: \`${{ steps.rebase.outputs.changed }}\`"
+            echo "- Dispatched: RTL branch CI"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: No rebuild needed
+        if: steps.rebase.outputs.changed != 'true' && inputs.force_rebuild != true
         env:
           RTL_SHA: ${{ steps.rebase.outputs.sha }}
-          RTL_CHANGED: ${{ steps.rebase.outputs.changed }}
-          MAIN_CHANGED: ${{ steps.main_sync.outputs.changed }}
         run: |
           {
             echo "### Fork synchronization complete"
             echo
-            echo "- Main updated from upstream: \`$MAIN_CHANGED\`"
+            echo "- Main updated from upstream: \`${{ steps.main_sync.outputs.changed }}\`"
             echo "- RTL commit: \`$RTL_SHA\`"
-            echo "- RTL branch changed: \`$RTL_CHANGED\`"
+            echo "- RTL branch changed: \`false\`"
+            echo "- Validation/build: not needed"
           } >> "$GITHUB_STEP_SUMMARY"
-
-  verify:
-    needs: sync
-    if: needs.sync.outputs.changed == 'true' || inputs.force_rebuild == true
-    uses: ./.github/workflows/rtl-verify.yml
-    permissions:
-      contents: read
-
-  build:
-    needs:
-      - sync
-      - verify
-    if: >-
-      always() &&
-      (needs.sync.outputs.changed == 'true' || inputs.force_rebuild == true) &&
-      needs.verify.result == 'success'
-    uses: ./.github/workflows/build-rtl-windows.yml
-    permissions:
-      contents: write
-
-  no-rebuild-needed:
-    needs: sync
-    if: needs.sync.outputs.changed != 'true' && inputs.force_rebuild != true
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Upstream and the RTL branch are already current; no rebuild was needed." >> "$GITHUB_STEP_SUMMARY"
