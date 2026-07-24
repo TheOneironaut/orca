@@ -1,0 +1,191 @@
+name: Sync upstream and RTL patch
+
+# Keep the fork current, rebase the minimal RTL branch, verify it, and only then
+# publish a Windows installer. Fork-owned files are reapplied on top of the exact
+# upstream tip, so README or workflow changes upstream cannot create merge conflicts.
+# The twice-hourly schedule bounds normal upstream lag; manual runs remain available.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/sync-upstream-and-rtl.yml
+      - README.md
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: Re-run RTL verification and Windows packaging even when the branch SHA is unchanged
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-and-rtl
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      changed: ${{ steps.rebase.outputs.changed }}
+      rtl_sha: ${{ steps.rebase.outputs.sha }}
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Record current revisions and preserve fork overlay
+        id: before
+        run: |
+          git fetch origin main fix/native-chat-rtl
+          echo "main_sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
+          echo "rtl_sha=$(git rev-parse origin/fix/native-chat-rtl)" >> "$GITHUB_OUTPUT"
+
+          overlay="$RUNNER_TEMP/orca-fork-overlay"
+          mkdir -p "$overlay/.github/workflows"
+          for file in \
+            .github/workflows/build-rtl-windows.yml \
+            .github/workflows/rtl-branch-ci.yml \
+            .github/workflows/rtl-verify.yml \
+            .github/workflows/sync-upstream-and-rtl.yml; do
+            cp "$file" "$overlay/$file"
+          done
+          echo "path=$overlay" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild main from the exact upstream tip
+        id: main_sync
+        env:
+          OLD_MAIN_SHA: ${{ steps.before.outputs.main_sha }}
+          OVERLAY_PATH: ${{ steps.before.outputs.path }}
+        run: |
+          git remote add upstream https://github.com/stablyai/orca.git 2>/dev/null || \
+            git remote set-url upstream https://github.com/stablyai/orca.git
+          git fetch upstream main
+          git reset --hard upstream/main
+
+          mkdir -p .github/workflows
+          cp "$OVERLAY_PATH"/.github/workflows/*.yml .github/workflows/
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("README.md")
+          text = path.read_text(encoding="utf-8")
+          start = "<!-- ORCA_RTL_DOWNLOAD_START -->"
+          end = "<!-- ORCA_RTL_DOWNLOAD_END -->"
+          block = "\n".join([
+              start,
+              '<p align="center">',
+              '  <strong>Hebrew / Arabic Native Chat build for Windows:</strong><br/>',
+              '  <a href="https://github.com/TheOneironaut/orca/releases/download/rtl-latest/orca-rtl-windows-setup.exe"><strong>Download the latest Orca RTL Windows installer</strong></a>',
+              '  · <a href="https://github.com/TheOneironaut/orca/releases/tag/rtl-latest">Release details &amp; SHA-256</a>',
+              '</p>',
+              end,
+              '',
+          ])
+
+          if start in text and end in text:
+              before, remainder = text.split(start, 1)
+              _, after = remainder.split(end, 1)
+              updated = before + block + after.lstrip("\n")
+          else:
+              anchor = "</h1>"
+              if anchor not in text:
+                  raise SystemExit("README heading anchor not found")
+              updated = text.replace(anchor, anchor + "\n\n" + block, 1)
+
+          path.write_text(updated, encoding="utf-8")
+          PY
+
+          git add README.md \
+            .github/workflows/build-rtl-windows.yml \
+            .github/workflows/rtl-branch-ci.yml \
+            .github/workflows/rtl-verify.yml \
+            .github/workflows/sync-upstream-and-rtl.yml
+          git diff --cached --check
+
+          if git diff --cached --quiet origin/main --; then
+            git reset --hard origin/main
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore: sync upstream and preserve RTL automation"
+          git push origin HEAD:main \
+            --force-with-lease=refs/heads/main:$OLD_MAIN_SHA
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh synchronized main ref
+        run: git fetch origin main
+
+      - name: Rebase RTL patch branch onto synchronized main
+        id: rebase
+        env:
+          OLD_RTL_SHA: ${{ steps.before.outputs.rtl_sha }}
+        run: |
+          git switch -C fix/native-chat-rtl origin/fix/native-chat-rtl
+          git rebase origin/main
+          git push origin HEAD:fix/native-chat-rtl \
+            --force-with-lease=refs/heads/fix/native-chat-rtl:$OLD_RTL_SHA
+
+          new_sha=$(git rev-parse HEAD)
+          echo "sha=$new_sha" >> "$GITHUB_OUTPUT"
+          if [[ "$new_sha" != "$OLD_RTL_SHA" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summarize synchronized revision
+        env:
+          RTL_SHA: ${{ steps.rebase.outputs.sha }}
+          RTL_CHANGED: ${{ steps.rebase.outputs.changed }}
+          MAIN_CHANGED: ${{ steps.main_sync.outputs.changed }}
+        run: |
+          {
+            echo "### Fork synchronization complete"
+            echo
+            echo "- Main updated from upstream: \`$MAIN_CHANGED\`"
+            echo "- RTL commit: \`$RTL_SHA\`"
+            echo "- RTL branch changed: \`$RTL_CHANGED\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true' || inputs.force_rebuild == true
+    uses: ./.github/workflows/rtl-verify.yml
+    permissions:
+      contents: read
+
+  build:
+    needs:
+      - sync
+      - verify
+    if: >-
+      always() &&
+      (needs.sync.outputs.changed == 'true' || inputs.force_rebuild == true) &&
+      needs.verify.result == 'success'
+    uses: ./.github/workflows/build-rtl-windows.yml
+    permissions:
+      contents: write
+
+  no-rebuild-needed:
+    needs: sync
+    if: needs.sync.outputs.changed != 'true' && inputs.force_rebuild != true
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Upstream and the RTL branch are already current; no rebuild was needed." >> "$GITHUB_STEP_SUMMARY"

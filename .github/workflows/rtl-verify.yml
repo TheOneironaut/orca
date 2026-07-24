@@ -1,0 +1,133 @@
+name: Verify RTL branch
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out RTL branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/native-chat-rtl
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install native build tools
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3 zlib1g-dev zsh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Use external node-gyp on Linux
+        run: |
+          npm install -g node-gyp@11.5.0
+          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
+
+      - name: Prepare dependency install
+        run: |
+          if [ -e node_modules ]; then
+            ls -ld node_modules
+            rm -rf node_modules
+          fi
+
+      - name: Install dependencies
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
+
+      - name: Lint
+        run: pnpm exec oxlint --format github
+
+      - name: Check styled scrollbars
+        run: pnpm check:styled-scrollbars
+
+      - name: Check reliability gate manifest
+        run: pnpm run check:reliability-gates
+
+      - name: Enforce max-lines ratchet
+        run: pnpm run check:max-lines-ratchet
+
+      - name: Verify bundled skill guides
+        run: pnpm run verify:bundled-skill-guides
+
+      # The skill freshness manifest derives official identities from the
+      # canonical repository's release graph, so it is intentionally omitted
+      # for this fork-specific verification workflow.
+      - name: Guard against project-owned .d.ts in preload/shared
+        run: |
+          matches=$(find src/preload src/shared -name '*.d.ts' 2>/dev/null || true)
+          if [ -n "$matches" ]; then
+            echo "::error::Project-owned .d.ts files are not allowed under src/preload or src/shared."
+            echo "$matches"
+            exit 1
+          fi
+
+      - name: Check feature wall asset budget
+        run: pnpm check:feature-wall-assets
+
+      - name: Verify macOS entitlements
+        run: pnpm verify:macos-entitlements
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Verify Git binary compatibility matrix
+        run: |
+          archive="$RUNNER_TEMP/git-2.25.5.tar.gz"
+          source="$RUNNER_TEMP/git-2.25.5"
+          curl -fsSL https://www.kernel.org/pub/software/scm/git/git-2.25.5.tar.gz -o "$archive"
+          echo "41662c52fc16fec4963bfc41075e71f8ead6b5e386797eb6f9a1111ff95a8ddf  $archive" | sha256sum --check
+          mkdir -p "$source"
+          tar -xzf "$archive" -C "$source" --strip-components=1
+          make -C "$source" -j2 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease NO_PYTHON=YesPlease git
+          ORCA_GIT_COMPAT_BINARY="$source/git" ORCA_GIT_COMPAT_VERSION="2.25.5" \
+            pnpm exec vitest run --config config/vitest.config.ts src/shared/git-binary-compatibility.test.ts
+
+          for spec in \
+            "alpine/git:edge-2.38.1|2.38.1" \
+            "alpine/git:v2.49.1|2.49.1"; do
+            image="${spec%%|*}"
+            version="${spec#*|}"
+            ORCA_GIT_COMPAT_IMAGE="$image" ORCA_GIT_COMPAT_VERSION="$version" \
+              pnpm exec vitest run --config config/vitest.config.ts src/shared/git-binary-compatibility.test.ts
+          done
+
+      - name: Rebuild better-sqlite3 for Node
+        run: pnpm rebuild better-sqlite3
+
+      - name: Install Electron package binary for tests
+        run: node config/scripts/install-electron-package-binary.mjs
+
+      - name: Test
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee "$RUNNER_TEMP/orca-rtl-test.log"
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rtl-test-log-${{ github.run_id }}
+          path: ${{ runner.temp }}/orca-rtl-test.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build unpacked app
+        run: pnpm build:unpack
+
+      - name: Smoke packaged CLI
+        run: node config/scripts/smoke-packaged-cli.mjs --app-dir=dist/linux-unpacked

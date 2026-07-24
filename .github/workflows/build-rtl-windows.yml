@@ -1,0 +1,117 @@
+name: Build RTL Windows installer
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+    steps:
+      - name: Check out RTL branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/native-chat-rtl
+          fetch-depth: 0
+
+      - name: Record source revision
+        id: source
+        shell: pwsh
+        run: |
+          "sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+          "short_sha=$(git rev-parse --short HEAD)" >> $env:GITHUB_OUTPUT
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.24.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
+
+      - name: Build native Windows helpers
+        shell: pwsh
+        run: pnpm run build:native
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: pnpm run build:win
+
+      - name: Prepare release files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          $installer = Get-ChildItem -Path dist -Recurse -File -Filter "orca-windows-setup.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Could not find dist/orca-windows-setup.exe"
+          }
+          Copy-Item $installer.FullName release/orca-rtl-windows-setup.exe
+          $hash = (Get-FileHash release/orca-rtl-windows-setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  orca-rtl-windows-setup.exe" | Set-Content -Encoding ascii release/orca-rtl-windows-setup.exe.sha256
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: orca-rtl-windows-${{ steps.source.outputs.short_sha }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish rolling latest release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RTL_SHA: ${{ steps.source.outputs.sha }}
+          RTL_SHORT_SHA: ${{ steps.source.outputs.short_sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          git tag -f rtl-latest $env:RTL_SHA
+          git push origin refs/tags/rtl-latest --force
+
+          $notes = @"
+          Automated unsigned Windows build of Orca with content-level RTL support for Native Chat.
+
+          Source branch: ``fix/native-chat-rtl``
+          Source commit: ``$env:RTL_SHA``
+
+          Download ``orca-rtl-windows-setup.exe`` below. Windows SmartScreen may warn because this community build is not signed with Orca's official certificate.
+          "@
+
+          gh release view rtl-latest *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit rtl-latest `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease
+            gh release upload rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --clobber
+          } else {
+            $global:LASTEXITCODE = 0
+            gh release create rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease `
+              --target $env:RTL_SHA
+          }
