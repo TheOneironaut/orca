@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: Rebuild even when the upstream commit has already been published
+        description: Rebuild even when this upstream commit is already published
         required: false
         type: boolean
         default: true
@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: orca-rtl-build
+  group: orca-rtl-minimal-builder
   cancel-in-progress: false
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Check out builder
         uses: actions/checkout@v6
 
-      - name: Check latest upstream revision
+      - name: Resolve exact upstream revision
         id: upstream
         shell: pwsh
         env:
@@ -65,23 +65,52 @@ jobs:
           "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
           "build=$($shouldBuild.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 
-      - name: No upstream update
+      - name: Record build start
+        shell: pwsh
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+          BUILD_REQUIRED: ${{ steps.upstream.outputs.build }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          New-Item -ItemType Directory -Force -Path .github | Out-Null
+          $status = if ($env:BUILD_REQUIRED -eq "true") { "running" } else { "up-to-date" }
+          $payload = [ordered]@{
+            status = $status
+            upstream_commit = $env:UPSTREAM_SHA
+            run_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            updated_at = (Get-Date).ToUniversalTime().ToString("o")
+          } | ConvertTo-Json
+          $payload | Set-Content -Encoding utf8 .github\build-status.json
+
+          git add .github/build-status.json
+          git commit -m "ci: record Orca RTL build start"
+          git push origin HEAD:main
+
+      - name: Already current
         if: steps.upstream.outputs.build != 'true'
         shell: pwsh
         run: |
           "The latest upstream commit is already published." | Add-Content $env:GITHUB_STEP_SUMMARY
 
-      - name: Clone Orca
+      - name: Fetch exact Orca commit
         if: steps.upstream.outputs.build == 'true'
         shell: pwsh
         env:
           UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
         run: |
           $ErrorActionPreference = "Stop"
-          git clone --depth 1 https://github.com/stablyai/orca.git orca-src
+          New-Item -ItemType Directory -Force -Path orca-src | Out-Null
+          git -C orca-src init
+          git -C orca-src remote add origin https://github.com/stablyai/orca.git
+          git -C orca-src fetch --depth 1 origin $env:UPSTREAM_SHA
+          git -C orca-src checkout --detach FETCH_HEAD
+
           $actual = git -C orca-src rev-parse HEAD
           if ($actual -ne $env:UPSTREAM_SHA) {
-            throw "Cloned $actual, expected $env:UPSTREAM_SHA."
+            throw "Checked out $actual, expected $env:UPSTREAM_SHA."
           }
 
       - name: Apply RTL patch
@@ -188,7 +217,7 @@ jobs:
           Builder commit: $env:GITHUB_SHA
           Installer SHA-256: $env:INSTALLER_SHA256
 
-          The only source modification is the patch in patches/native-chat-rtl.patch.
+          The only source modification is patches/native-chat-rtl.patch.
           Windows SmartScreen may warn because this community build is unsigned.
           "@
 
@@ -218,11 +247,44 @@ jobs:
               --prerelease
           }
 
-          $summary = @"
+          @"
           ### Published Orca RTL
 
           - Upstream version: ``$env:UPSTREAM_VERSION``
           - Upstream commit: ``$env:UPSTREAM_SHA``
           - Installer SHA-256: ``$env:INSTALLER_SHA256``
-          "@
-          $summary | Add-Content $env:GITHUB_STEP_SUMMARY
+          "@ | Add-Content $env:GITHUB_STEP_SUMMARY
+
+      - name: Record final status
+        if: always()
+        shell: pwsh
+        env:
+          JOB_STATUS: ${{ job.status }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+          BUILD_REQUIRED: ${{ steps.upstream.outputs.build }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git switch -C build-status-work origin/main
+
+          $status = $env:JOB_STATUS
+          if ($status -eq "success" -and $env:BUILD_REQUIRED -ne "true") {
+            $status = "up-to-date"
+          }
+
+          $payload = [ordered]@{
+            status = $status
+            upstream_commit = $env:UPSTREAM_SHA
+            run_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            updated_at = (Get-Date).ToUniversalTime().ToString("o")
+          } | ConvertTo-Json
+          $payload | Set-Content -Encoding utf8 .github\build-status.json
+
+          git add .github/build-status.json
+          if (-not (git diff --cached --quiet)) {
+            git commit -m "ci: record Orca RTL build $status"
+            git push origin HEAD:main
+          }
