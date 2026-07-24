@@ -1,0 +1,256 @@
+===== build-native.log =====
+
+> orca@1.4.153-rc.3 build:native D:\a\orca\orca\orca-src
+> node config/scripts/build-native-for-platform.mjs
+
+===== build-win.log =====
+[2m../../out/web/[22m[36massets/yaml-Cg4BerBJ.js                                   [39m[1m[2m    3.85 kB[22m[1m[22m[2m │ gzip:     1.45 kB[22m
+[2m../../out/web/[22m[36massets/use-mobile-emulator-agent-setup-state-DMf7VDME.js  [39m[1m[2m    4.00 kB[22m[1m[22m[2m │ gzip:     1.59 kB[22m
+[2m../../out/web/[22m[36massets/rust-BzKRNQWT.js                                   [39m[1m[2m    4.02 kB[22m[1m[22m[2m │ gzip:     1.79 kB[22m
+[2m../../out/web/[22m[36massets/python-BpJhFwso.js                                 [39m[1m[2m    4.03 kB[22m[1m[22m[2m │ gzip:     1.61 kB[22m
+[2m../../out/web/[22m[36massets/source-control-fix-split-button-B70x8eok.js        [39m[1m[2m    4.05 kB[22m[1m[22m[2m │ gzip:     1.84 kB[22m
+[2m../../out/web/[22m[36massets/DiffCommentCard-Cx0ySIsP.js                        [39m[1m[2m    4.06 kB[22m[1m[22m[2m │ gzip:     1.48 kB[22m
+[2m../../out/web/[22m[36massets/dart-BOtBlQCF.js                                   [39m[1m[2m    4.11 kB[22m[1m[22m[2m │ gzip:     1.61 kB[22m
+[2m../../out/web/[22m[36massets/OrcaYamlTrustDialog-DViMuU7R.js                    [39m[1m[2m    4.20 kB[22m[1m[22m[2m │ gzip:     1.70 kB[22m
+[2m../../out/web/[22m[36massets/large-diff-render-limit-BWfcqm2a.js                [39m[1m[2m    4.21 kB[22m[1m[22m[2m │ gzip:     1.58 kB[22m
+[2m../../out/web/[22m[36massets/css-DdJfP1eB.js                                    [39m[1m[2m    4.37 kB[22m[1m[22m[2m │ gzip:     1.34 kB[22m
+[2m../../out/web/[22m[36massets/csharp-Co3qMtFm.js                                 [39m[1m[2m    4.39 kB[22m[1m[22m[2m │ gzip:     1.69 kB[22m
+[2m../../out/web/[22m[36massets/diagram-LMA3HP47-D0x-UcXA.js                       [39m[1m[2m    4.46 kB[22m[1m[22m[2m │ gzip:     1.95 kB[22m
+[2m../../out/web/[22m[36massets/mdx-BdfM9uEj.js                                    [39m[1m[2m    4.63 kB[22m[1m[22m[2m │ gzip:     1.37 kB[22m
+[2m../../out/web/[22m[36massets/CsvViewer-uHdULRWa.js                              [39m[1m[2m    4.65 kB[22m[1m[22m[2m │ gzip:     1.99 kB[22m
+[2m../../out/web/[22m[36massets/branch-name-from-work-BRn_vv6p.js                  [39m[1m[2m    4.65 kB[22m[1m[22m[2m │ gzip:     2.07 kB[22m
+[2m../../out/web/[22m[36massets/defaultLocale-DX6XiGOO.js                          [39m[1m[2m    4.69 kB[22m[1m[22m[2m │ gzip:     2.18 kB[22m
+[2m../../out/web/[22m[36massets/pug-8SOpv6rk.js                                    [39m[1m[2m    4.69 kB[22m[1m[22m[2m │ gzip:     1.61 kB[22m
+[2m../../out/web/[22m[36massets/msdax-DmeGPVcC.js                                  [39m[1m[2m    4.77 kB[22m[1m[22m[2m │ gzip:     1.91 kB[22m
+[2m../../out/web/[22m[36massets/swift-CnmFD0ga.js                                  [39m[1m[2m    4.77 kB[22m[1m[22m[2m │ gzip:     2.00 kB[22m
+[2m../../out/web/[22m[36massets/html-C-isG8Y7.js                                   [39m[1m[2m    4.84 kB[22m[1m[22m[2m │ gzip:     1.32 kB[22m
+[2m../../out/web/[22m[36massets/linear-api-key-dialog-BVrt-wOq.js                  [39m[1m[2m    4.92 kB[22m[1m[22m[2m │ gzip:     1.99 kB[22m
+[2m../../out/web/[22m[36massets/cpp-BbWJElDN.js                                    [39m[1m[2m    5.16 kB[22m[1m[22m[2m │ gzip:     2.06 kB[22m
+[2m../../out/web/[22m[36massets/useContextualCopySetup-B2Cp5_4v.js                 [39m[1m[2m    5.17 kB[22m[1m[22m[2m │ gzip:     2.19 kB[22m
+[2m../../out/web/[22m[36massets/ecl-BEgZUVRK.js                                    [39m[1m[2m    5.20 kB[22m[1m[22m[2m │ gzip:     2.19 kB[22m
+[2m../../out/web/[22m[36massets/typescript-DLPd-rip.js                             [39m[1m[2m    5.21 kB[22m[1m[22m[2m │ gzip:     2.11 kB[22m
+[2m../../out/web/[22m[36massets/RemoteServerUpdateDialog-CZzXli5C.js               [39m[1m[2m    5.23 kB[22m[1m[22m[2m │ gzip:     1.78 kB[22m
+[2m../../out/web/[22m[36massets/active-agent-note-send-COvhCj-q.js                 [39m[1m[2m    5.32 kB[22m[1m[22m[2m │ gzip:     1.70 kB[22m
+[2m../../out/web/[22m[36massets/pieDiagram-4H26LBE5-fUureOFF.js                    [39m[1m[2m    5.52 kB[22m[1m[22m[2m │ gzip:     2.45 kB[22m
+[2m../../out/web/[22m[36massets/vb-Db0cS2oM.js                                     [39m[1m[2m    5.65 kB[22m[1m[22m[2m │ gzip:     2.02 kB[22m
+[2m../../out/web/[22m[36massets/linear-CfiGKDkw.js                                 [39m[1m[2m    5.66 kB[22m[1m[22m[2m │ gzip:     2.31 kB[22m
+[2m../../out/web/[22m[36massets/PetStatusSegment-DWhQAHRI.js                       [39m[1m[2m    5.73 kB[22m[1m[22m[2m │ gzip:     2.12 kB[22m
+[2m../../out/web/[22m[36massets/twig-Csy3S7wG.js                                   [39m[1m[2m    5.84 kB[22m[1m[22m[2m │ gzip:     1.49 kB[22m
+[2m../../out/web/[22m[36massets/source-control-ai-recipe-save-CXYL0ftg.js          [39m[1m[2m    5.89 kB[22m[1m[22m[2m │ gzip:     2.02 kB[22m
+[2m../../out/web/[22m[36massets/diagram-2AECGRRQ-BfM34A6z.js                       [39m[1m[2m    6.06 kB[22m[1m[22m[2m │ gzip:     2.58 kB[22m
+[2m../../out/web/[22m[36massets/WorktreeCreationPanel-Cr2b9ihP.js                  [39m[1m[2m    6.10 kB[22m[1m[22m[2m │ gzip:     1.86 kB[22m
+[2m../../out/web/[22m[36massets/scss-CBJaRo0y.js                                   [39m[1m[2m    6.27 kB[22m[1m[22m[2m │ gzip:     1.71 kB[22m
+[2m../../out/web/[22m[36massets/jira-connect-dialog-YzbyDnbg.js                    [39m[1m[2m    6.58 kB[22m[1m[22m[2m │ gzip:     2.26 kB[22m
+[2m../../out/web/[22m[36massets/handlebars-Bih_rTa1.js                             [39m[1m[2m    6.60 kB[22m[1m[22m[2m │ gzip:     1.54 kB[22m
+[2m../../out/web/[22m[36massets/github-pr-merge-methods-CaY6qqpW.js                [39m[1m[2m    6.65 kB[22m[1m[22m[2m │ gzip:     1.97 kB[22m
+[2m../../out/web/[22m[36massets/IntegrationsStep-BfhrrvCJ.js                       [39m[1m[2m    6.81 kB[22m[1m[22m[2m │ gzip:     2.06 kB[22m
+[2m../../out/web/[22m[36massets/julia-cl7-CwDS.js                                  [39m[1m[2m    7.01 kB[22m[1m[22m[2m │ gzip:     2.62 kB[22m
+[2m../../out/web/[22m[36massets/monaco-find-options-Dc46c473.js                    [39m[1m[2m    7.03 kB[22m[1m[22m[2m │ gzip:     3.12 kB[22m
+[2m../../out/web/[22m[36massets/scala-D9hQfWCl.js                                  [39m[1m[2m    7.18 kB[22m[1m[22m[2m │ gzip:     2.06 kB[22m
+[2m../../out/web/[22m[36massets/wgsl-BTesnYfV.js                                   [39m[1m[2m    7.21 kB[22m[1m[22m[2m │ gzip:     2.72 kB[22m
+[2m../../out/web/[22m[36massets/st-CHwy0fLd.js                                     [39m[1m[2m    7.26 kB[22m[1m[22m[2m │ gzip:     2.21 kB[22m
+[2m../../out/web/[22m[36massets/systemverilog-Bs9z6M-B.js                          [39m[1m[2m    7.47 kB[22m[1m[22m[2m │ gzip:     2.72 kB[22m
+[2m../../out/web/[22m[36massets/postiats-CocnycG-.js                               [39m[1m[2m    7.72 kB[22m[1m[22m[2m │ gzip:     2.40 kB[22m
+[2m../../out/web/[22m[36massets/php-BBUBE1dy.js                                    [39m[1m[2m    7.89 kB[22m[1m[22m[2m │ gzip:     2.04 kB[22m
+[2m../../out/web/[22m[36massets/WorktreeMetaDialog-pusuoUAI.js                     [39m[1m[2m    7.94 kB[22m[1m[22m[2m │ gzip:     2.92 kB[22m
+[2m../../out/web/[22m[36massets/perl-Ub6l9XKa.js                                   [39m[1m[2m    8.12 kB[22m[1m[22m[2m │ gzip:     3.10 kB[22m
+[2m../../out/web/[22m[36massets/ruby-zBfavPgS.js                                   [39m[1m[2m    8.37 kB[22m[1m[22m[2m │ gzip:     2.54 kB[22m
+[2m../../out/web/[22m[36massets/razor-D4Coieec.js                                  [39m[1m[2m    8.60 kB[22m[1m[22m[2m │ gzip:     2.22 kB[22m
+[2m../../out/web/[22m[36massets/QuickOpen-Dsdd0f6f.js                              [39m[1m[2m    8.73 kB[22m[1m[22m[2m │ gzip:     3.38 kB[22m
+[2m../../out/web/[22m[36massets/protobuf-Brw8urJB.js                               [39m[1m[2m    8.91 kB[22m[1m[22m[2m │ gzip:     2.04 kB[22m
+[2m../../out/web/[22m[36massets/DiffViewer-8VN7jhZg.js                             [39m[1m[2m    8.96 kB[22m[1m[22m[2m │ gzip:     3.77 kB[22m
+[2m../../out/web/[22m[36massets/file-type-icons-DunClV2o.js                        [39m[1m[2m    9.20 kB[22m[1m[22m[2m │ gzip:     2.90 kB[22m
+[2m../../out/web/[22m[36massets/Landing-DipC0_Xu.js                                [39m[1m[2m    9.33 kB[22m[1m[22m[2m │ gzip:     3.45 kB[22m
+[2m../../out/web/[22m[36massets/SkillsPage-CVm8X_Yq.js                             [39m[1m[2m    9.49 kB[22m[1m[22m[2m │ gzip:     3.25 kB[22m
+[2m../../out/web/[22m[36massets/clojure-Dnu-v4kV.js                                [39m[1m[2m    9.51 kB[22m[1m[22m[2m │ gzip:     3.57 kB[22m
+[2m../../out/web/[22m[36massets/PetOverlay-BxNhdQ1w.js                             [39m[1m[2m    9.63 kB[22m[1m[22m[2m │ gzip:     3.94 kB[22m
+[2m../../out/web/[22m[36massets/ReviewNotesSendMenuContent-DXLWrsgD.js             [39m[1m[2m    9.81 kB[22m[1m[22m[2m │ gzip:     3.90 kB[22m
+[2m../../out/web/[22m[36massets/PortsStatusSegment-BHf2CmuR.js                     [39m[1m[2m   10.05 kB[22m[1m[22m[2m │ gzip:     3.37 kB[22m
+[2m../../out/web/[22m[36massets/elixir-BkW5O-1t.js                                 [39m[1m[2m   10.12 kB[22m[1m[22m[2m │ gzip:     2.50 kB[22m
+[2m../../out/web/[22m[36massets/sql-ClhHkBeG.js                                    [39m[1m[2m   10.16 kB[22m[1m[22m[2m │ gzip:     3.79 kB[22m
+[2m../../out/web/[22m[36massets/stateDiagram-AJRCARHV-D7V6CsXT.js                  [39m[1m[2m   10.61 kB[22m[1m[22m[2m │ gzip:     3.74 kB[22m
+[2m../../out/web/[22m[36massets/diagram-KO2AKTUF-By0MPHRL.js                       [39m[1m[2m   10.96 kB[22m[1m[22m[2m │ gzip:     4.25 kB[22m
+[2m../../out/web/[22m[36massets/CrashReportDialogSurface-yhVA6n8v.js               [39m[1m[2m   11.04 kB[22m[1m[22m[2m │ gzip:     3.98 kB[22m
+[2m../../out/web/[22m[36massets/mysql-C_tMU-Nz.js                                  [39m[1m[2m   11.14 kB[22m[1m[22m[2m │ gzip:     4.01 kB[22m
+[2m../../out/web/[22m[36massets/FolderWorkspacePrChecksPanel-_WIveNLw.js           [39m[1m[2m   11.34 kB[22m[1m[22m[2m │ gzip:     3.97 kB[22m
+[2m../../out/web/[22m[36massets/dagre-BM42HDAG-CBZiNUxl.js                         [39m[1m[2m   11.38 kB[22m[1m[22m[2m │ gzip:     4.23 kB[22m
+[2m../../out/web/[22m[36massets/SshStatusSegment-D_jqBo07.js                       [39m[1m[2m   11.64 kB[22m[1m[22m[2m │ gzip:     3.25 kB[22m
+[2m../../out/web/[22m[36massets/redshift-Bs9aos_-.js                               [39m[1m[2m   11.66 kB[22m[1m[22m[2m │ gzip:     4.30 kB[22m
+[2m../../out/web/[22m[36massets/ai-vault-session-drag-sm5bgPhf.js                  [39m[1m[2m   11.88 kB[22m[1m[22m[2m │ gzip:     3.89 kB[22m
+[2m../../out/web/[22m[36massets/fix-checks-agent-launch-CkWmDRUj.js                [39m[1m[2m   12.05 kB[22m[1m[22m[2m │ gzip:     4.72 kB[22m
+[2m../../out/web/[22m[36massets/jsonMode-DtYR6xq3.js                               [39m[1m[2m   12.72 kB[22m[1m[22m[2m │ gzip:     4.72 kB[22m
+[2m../../out/web/[22m[36massets/pgsql-BlNEE0v7.js                                  [39m[1m[2m   13.33 kB[22m[1m[22m[2m │ gzip:     4.46 kB[22m
+[2m../../out/web/[22m[36massets/markdown-review-note-copy-DmcvgRUg.js              [39m[1m[2m   13.37 kB[22m[1m[22m[2m │ gzip:     5.21 kB[22m
+[2m../../out/web/[22m[36massets/agent-paste-draft-hrZ6iWsi.js                      [39m[1m[2m   13.72 kB[22m[1m[22m[2m │ gzip:     5.33 kB[22m
+[2m../../out/web/[22m[36massets/abap-DLDM7-KI.js                                   [39m[1m[2m   14.03 kB[22m[1m[22m[2m │ gzip:     5.27 kB[22m
+[2m../../out/web/[22m[36massets/DeleteWorktreeDialog-DKCXOY_Y.js                   [39m[1m[2m   14.14 kB[22m[1m[22m[2m │ gzip:     4.53 kB[22m
+[2m../../out/web/[22m[36massets/DictationController-BDWBcZCR.js                    [39m[1m[2m   14.16 kB[22m[1m[22m[2m │ gzip:     5.15 kB[22m
+[2m../../out/web/[22m[36massets/ContextualTourOverlay-B8FQ1Ved.js                  [39m[1m[2m   15.05 kB[22m[1m[22m[2m │ gzip:     5.54 kB[22m
+[2m../../out/web/[22m[36massets/rich-markdown-spellcheck-Bs2n051S.js               [39m[1m[2m   15.74 kB[22m[1m[22m[2m │ gzip:     5.38 kB[22m
+[2m../../out/web/[22m[36massets/freemarker2-DoRPPv4C.js                            [39m[1m[2m   15.90 kB[22m[1m[22m[2m │ gzip:     4.07 kB[22m
+[2m../../out/web/[22m[36massets/diagram-OG6HWLK6-zNIX59I-.js                       [39m[1m[2m   16.05 kB[22m[1m[22m[2m │ gzip:     5.78 kB[22m
+[2m../../out/web/[22m[36massets/MobileBrandIcons-CHNlgWum.js                       [39m[1m[2m   16.66 kB[22m[1m[22m[2m │ gzip:     5.99 kB[22m
+[2m../../out/web/[22m[36massets/powerquery-tScXyioY.js                             [39m[1m[2m   16.80 kB[22m[1m[22m[2m │ gzip:     4.81 kB[22m
+[2m../../out/web/[22m[36massets/ishikawaDiagram-YF4QCWOH-l5kOXv5G.js               [39m[1m[2m   17.72 kB[22m[1m[22m[2m │ gzip:     6.77 kB[22m
+[2m../../out/web/[22m[36massets/UpdateCard-BvgqUA7A.js                             [39m[1m[2m   17.78 kB[22m[1m[22m[2m │ gzip:     5.02 kB[22m
+[2m../../out/web/[22m[36massets/MonacoEditor-qBmb8yRN.js                           [39m[1m[2m   18.04 kB[22m[1m[22m[2m │ gzip:     7.18 kB[22m
+[2m../../out/web/[22m[36massets/solidity-Db0IVjzk.js                               [39m[1m[2m   18.46 kB[22m[1m[22m[2m │ gzip:     4.41 kB[22m
+[2m../../out/web/[22m[36massets/FeatureTipsModal-kJI1lvz2.js                       [39m[1m[2m   18.68 kB[22m[1m[22m[2m │ gzip:     6.08 kB[22m
+[2m../../out/web/[22m[36massets/NotificationStep-BAgKgi32.js                       [39m[1m[2m   20.03 kB[22m[1m[22m[2m │ gzip:     6.39 kB[22m
+[2m../../out/web/[22m[36massets/kanban-definition-UN3LZRKU-D4MlBys_.js             [39m[1m[2m   20.54 kB[22m[1m[22m[2m │ gzip:     7.33 kB[22m
+[2m../../out/web/[22m[36massets/web-runtime-session-0oO8jgp3.js                    [39m[1m[2m   20.62 kB[22m[1m[22m[2m │ gzip:     5.86 kB[22m
+[2m../../out/web/[22m[36massets/main-jUx000mt.js                                   [39m[1m[2m   20.69 kB[22m[1m[22m[2m │ gzip:     7.77 kB[22m
+[2m../../out/web/[22m[36massets/IpynbViewer-BSa2OHrQ.js                            [39m[1m[2m   21.16 kB[22m[1m[22m[2m │ gzip:     7.65 kB[22m
+[2m../../out/web/[22m[36massets/tsMode-o-myNA7k.js                                 [39m[1m[2m   22.29 kB[22m[1m[22m[2m │ gzip:     6.39 kB[22m
+[2m../../out/web/[22m[36massets/AgentsOrchestrationVisual-BG4U2uQK.js              [39m[1m[2m   23.13 kB[22m[1m[22m[2m │ gzip:     7.09 kB[22m
+[2m../../out/web/[22m[36massets/large-diff-section-content-bacIlvH4.js             [39m[1m[2m   23.26 kB[22m[1m[22m[2m │ gzip:     7.98 kB[22m
+[2m../../out/web/[22m[36massets/sankeyDiagram-5OEKKPKP-lVYLF05c.js                 [39m[1m[2m   23.44 kB[22m[1m[22m[2m │ gzip:     8.68 kB[22m
+[2m../../out/web/[22m[36massets/mindmap-definition-RKZ34NQL-DSXfwzZb.js            [39m[1m[2m   23.70 kB[22m[1m[22m[2m │ gzip:     8.06 kB[22m
+[2m../../out/web/[22m[36massets/journeyDiagram-JHISSGLW-Ct_IhTJE.js                [39m[1m[2m   23.82 kB[22m[1m[22m[2m │ gzip:     8.47 kB[22m
+[2m../../out/web/[22m[36massets/graph--OzhPTMs.js                                  [39m[1m[2m   23.92 kB[22m[1m[22m[2m │ gzip:     8.32 kB[22m
+[2m../../out/web/[22m[36massets/nim.tmLanguage-IFO5FfiI.js                         [39m[1m[2m   24.87 kB[22m[1m[22m[2m │ gzip:     3.85 kB[22m
+[2m../../out/web/[22m[36massets/wardleyDiagram-YWT4CUSO-ClnwsfqD.js                [39m[1m[2m   25.75 kB[22m[1m[22m[2m │ gzip:     6.91 kB[22m
+[2m../../out/web/[22m[36massets/erDiagram-TEJ5UH35-D6J-jvu8.js                     [39m[1m[2m   27.10 kB[22m[1m[22m[2m │ gzip:     9.46 kB[22m
+[2m../../out/web/[22m[36massets/PortsPanel-To_0KGzE.js                             [39m[1m[2m   27.32 kB[22m[1m[22m[2m │ gzip:     7.10 kB[22m
+[2m../../out/web/[22m[36massets/lspLanguageFeatures-6katN4t1.js                    [39m[1m[2m   28.69 kB[22m[1m[22m[2m │ gzip:     7.74 kB[22m
+[2m../../out/web/[22m[36massets/gitGraphDiagram-PVQCEYII-lx8Ky4Ah.js               [39m[1m[2m   29.66 kB[22m[1m[22m[2m │ gzip:     8.82 kB[22m
+[2m../../out/web/[22m[36massets/SourceControlAgentActionDialog-Ci50qK2X.js         [39m[1m[2m   30.26 kB[22m[1m[22m[2m │ gzip:     9.62 kB[22m
+[2m../../out/web/[22m[36massets/timeline-definition-PNZ67QCA-BnhohjI0.js           [39m[1m[2m   31.08 kB[22m[1m[22m[2m │ gzip:    10.28 kB[22m
+[2m../../out/web/[22m[36massets/requirementDiagram-4Y6WPE33-0bhu7Ui-.js            [39m[1m[2m   31.25 kB[22m[1m[22m[2m │ gzip:     9.86 kB[22m
+[2m../../out/web/[22m[36massets/ActivityPrototypePage-Ci0g7cTL.js                  [39m[1m[2m   32.48 kB[22m[1m[22m[2m │ gzip:    10.15 kB[22m
+[2m../../out/web/[22m[36massets/worktree-activation-CCmFSZWV.js                    [39m[1m[2m   32.81 kB[22m[1m[22m[2m │ gzip:    11.03 kB[22m
+[2m../../out/web/[22m[36massets/quadrantDiagram-W4KKPZXB-D4eFirNT.js               [39m[1m[2m   34.27 kB[22m[1m[22m[2m │ gzip:    10.11 kB[22m
+[2m../../out/web/[22m[36massets/CombinedDiffViewer-DB76w1G1.js                     [39m[1m[2m   35.00 kB[22m[1m[22m[2m │ gzip:    11.59 kB[22m
+[2m../../out/web/[22m[36massets/layout-SsrduOYp.js                                 [39m[1m[2m   35.84 kB[22m[1m[22m[2m │ gzip:    12.87 kB[22m
+[2m../../out/web/[22m[36massets/chunk-AQP2D5EJ-BVddXWlT.js                         [39m[1m[2m   37.11 kB[22m[1m[22m[2m │ gzip:    12.11 kB[22m
+[2m../../out/web/[22m[36massets/monaco-setup-Cp95b9fr.js                           [39m[1m[2m   39.28 kB[22m[1m[22m[2m │ gzip:     9.85 kB[22m
+[2m../../out/web/[22m[36massets/ResourceUsageStatusSegment-B6frRBD4.js             [39m[1m[2m   39.42 kB[22m[1m[22m[2m │ gzip:    11.03 kB[22m
+[2m../../out/web/[22m[36massets/FloatingTerminalPanel-lBvxPDDP.js                  [39m[1m[2m   39.86 kB[22m[1m[22m[2m │ gzip:    12.42 kB[22m
+[2m../../out/web/[22m[36massets/xychartDiagram-2RQKCTM6-SucYD-F5.js                [39m[1m[2m   40.64 kB[22m[1m[22m[2m │ gzip:    11.69 kB[22m
+[2m../../out/web/[22m[36massets/vennDiagram-CIIHVFJN-BmFMFKpK.js                   [39m[1m[2m   41.68 kB[22m[1m[22m[2m │ gzip:    15.60 kB[22m
+[2m../../out/web/[22m[36massets/WorkspaceSpacePage-Dre51VZ3.js                     [39m[1m[2m   41.90 kB[22m[1m[22m[2m │ gzip:    11.47 kB[22m
+[2m../../out/web/[22m[36massets/OnboardingFlow-DSm5hhc_.js                         [39m[1m[2m   45.00 kB[22m[1m[22m[2m │ gzip:    13.72 kB[22m
+[2m../../out/web/[22m[36massets/web-session-tabs-sync-D8_nS025.js                  [39m[1m[2m   46.18 kB[22m[1m[22m[2m │ gzip:    13.75 kB[22m
+[2m../../out/web/[22m[36massets/chunk-727SXJPM-D4DktKeP.js                         [39m[1m[2m   48.97 kB[22m[1m[22m[2m │ gzip:    15.71 kB[22m
+[2m../../out/web/[22m[36massets/MarkdownPreview-B2sgpwrP.js                        [39m[1m[2m   53.88 kB[22m[1m[22m[2m │ gzip:    19.79 kB[22m
+[2m../../out/web/[22m[36massets/WorkspaceCleanupDialog-CFg8tjym.js                 [39m[1m[2m   54.68 kB[22m[1m[22m[2m │ gzip:    14.98 kB[22m
+[2m../../out/web/[22m[36massets/flowDiagram-I6XJVG4X-DF8ArCMH.js                   [39m[1m[2m   60.75 kB[22m[1m[22m[2m │ gzip:    19.49 kB[22m
+[2m../../out/web/[22m[36massets/textmate-token-provider-DgpNlK_O.js                [39m[1m[2m   62.59 kB[22m[1m[22m[2m │ gzip:    18.49 kB[22m
+[2m../../out/web/[22m[36massets/checks-panel-content-CjCwRTlF.js                   [39m[1m[2m   65.36 kB[22m[1m[22m[2m │ gzip:    17.96 kB[22m
+[2m../../out/web/[22m[36massets/WorktreeJumpPalette-BJ7__B-o.js                    [39m[1m[2m   67.96 kB[22m[1m[22m[2m │ gzip:    16.97 kB[22m
+[2m../../out/web/[22m[36massets/StatusBar-B5KhJOfO.js                              [39m[1m[2m   68.62 kB[22m[1m[22m[2m │ gzip:    18.39 kB[22m
+[2m../../out/web/[22m[36massets/ganttDiagram-6RSMTGT7-iTU0lfdD.js                  [39m[1m[2m   69.82 kB[22m[1m[22m[2m │ gzip:    23.61 kB[22m
+[2m../../out/web/[22m[36massets/c4Diagram-AAUBKEIU-B18MGlzB.js                     [39m[1m[2m   70.19 kB[22m[1m[22m[2m │ gzip:    19.75 kB[22m
+[2m../../out/web/[22m[36massets/FeatureWallSetupChecklist-BrmbBFKN.js              [39m[1m[2m   71.38 kB[22m[1m[22m[2m │ gzip:    17.28 kB[22m
+[2m../../out/web/[22m[36massets/blockDiagram-GPEHLZMM-DbLC7gHG.js                  [39m[1m[2m   73.78 kB[22m[1m[22m[2m │ gzip:    21.35 kB[22m
+[2m../../out/web/[22m[36massets/MobilePage-aAM4rvv2.js                             [39m[1m[2m   76.42 kB[22m[1m[22m[2m │ gzip:    23.25 kB[22m
+[2m../../out/web/[22m[36massets/AiVaultPanel-B5wDemq-.js                           [39m[1m[2m   76.86 kB[22m[1m[22m[2m │ gzip:    20.20 kB[22m
+[2m../../out/web/[22m[36massets/cose-bilkent-S5V4N54A-jbinIevL.js                  [39m[1m[2m   81.95 kB[22m[1m[22m[2m │ gzip:    22.61 kB[22m
+[2m../../out/web/[22m[36massets/FileExplorer-DL8L8The.js                           [39m[1m[2m   85.47 kB[22m[1m[22m[2m │ gzip:    26.09 kB[22m
+[2m../../out/web/[22m[36massets/AddRepoDialog-3vMYe5uz.js                          [39m[1m[2m   89.04 kB[22m[1m[22m[2m │ gzip:    23.59 kB[22m
+[2m../../out/web/[22m[36massets/ChecksPanel--jxBK0cI.js                            [39m[1m[2m   90.75 kB[22m[1m[22m[2m │ gzip:    26.57 kB[22m
+[2m../../out/web/[22m[36massets/rename-file-Cie1ldhm.js                            [39m[1m[2m   93.76 kB[22m[1m[22m[2m │ gzip:    30.28 kB[22m
+[2m../../out/web/[22m[36massets/Terminal-B55e51vq.js                               [39m[1m[2m  103.65 kB[22m[1m[22m[2m │ gzip:    32.33 kB[22m
+[2m../../out/web/[22m[36massets/sequenceDiagram-3UESZ5HK-CsZKe6Ib.js               [39m[1m[2m  117.12 kB[22m[1m[22m[2m │ gzip:    31.16 kB[22m
+[2m../../out/web/[22m[36massets/EditorPanel-oAL_fdeI.js                            [39m[1m[2m  119.82 kB[22m[1m[22m[2m │ gzip:    34.93 kB[22m
+[2m../../out/web/[22m[36massets/AutomationsPage-BkHAANIA.js                        [39m[1m[2m  135.44 kB[22m[1m[22m[2m │ gzip:    35.92 kB[22m
+[2m../../out/web/[22m[36massets/architectureDiagram-3BPJPVTR-BvmtoOYR.js           [39m[1m[2m  149.68 kB[22m[1m[22m[2m │ gzip:    42.32 kB[22m
+[2m../../out/web/[22m[36massets/useSettingsNavigationMetadata-CoFYoJLv.js          [39m[1m[2m  168.26 kB[22m[1m[22m[2m │ gzip:    34.05 kB[22m
+[2m../../out/web/[22m[36massets/FeatureWallModal-CIXIXd1r.js                       [39m[1m[2m  181.02 kB[22m[1m[22m[2m │ gzip:    45.49 kB[22m
+[2m../../out/web/[22m[36massets/unsaved-close-queue-Bh_2EIqY.js                    [39m[1m[2m  252.00 kB[22m[1m[22m[2m │ gzip:    73.25 kB[22m
+[2m../../out/web/[22m[36massets/SourceControl-DCts9Uu3.js                          [39m[1m[2m  255.23 kB[22m[1m[22m[2m │ gzip:    70.66 kB[22m
+[2m../../out/web/[22m[36massets/katex-DHMw6HUq.js                                  [39m[1m[2m  259.05 kB[22m[1m[22m[2m │ gzip:    76.99 kB[22m
+[2m../../out/web/[22m[36massets/RichMarkdownEditor-CzMD2zch.js                     [39m[1m[2m  422.50 kB[22m[1m[22m[2m │ gzip:   109.82 kB[22m
+[2m../../out/web/[22m[36massets/cytoscape.esm-DH6-wILU.js                          [39m[1m[2m  441.80 kB[22m[1m[22m[2m │ gzip:   141.55 kB[22m
+[2m../../out/web/[22m[36massets/zh-4iVg70mn.js                                     [39m[1m[33m  510.67 kB[39m[22m[2m │ gzip:   203.64 kB[22m
+[2m../../out/web/[22m[36massets/es-DNvHkHd1.js                                     [39m[1m[33m  579.57 kB[39m[22m[2m │ gzip:   205.13 kB[22m
+[2m../../out/web/[22m[36massets/mermaid.core-CgOL0_d9.js                           [39m[1m[33m  582.26 kB[39m[22m[2m │ gzip:   135.58 kB[22m
+[2m../../out/web/[22m[36massets/ImageViewer-ORuOCyWN.js                            [39m[1m[33m  595.83 kB[39m[22m[2m │ gzip:   178.31 kB[22m
+[2m../../out/web/[22m[36massets/ko-EfmpVEJP.js                                     [39m[1m[33m  604.87 kB[39m[22m[2m │ gzip:   208.43 kB[22m
+[2m../../out/web/[22m[36massets/wardley-L42UT6IY-DsOH0lMT.js                       [39m[1m[33m  612.68 kB[39m[22m[2m │ gzip:   147.52 kB[22m
+[2m../../out/web/[22m[36massets/ja-CC6968pM.js                                     [39m[1m[33m  671.75 kB[39m[22m[2m │ gzip:   219.75 kB[22m
+[2m../../out/web/[22m[36massets/TaskPage-BiqvFyP7.js                               [39m[1m[33m  733.58 kB[39m[22m[2m │ gzip:   178.62 kB[22m
+[2m../../out/web/[22m[36massets/Settings-Bj9ZfKPN.js                               [39m[1m[33m  774.40 kB[39m[22m[2m │ gzip:   192.16 kB[22m
+[2m../../out/web/[22m[36massets/web-index-BxpLrlpv.js                              [39m[1m[33m1,985.21 kB[39m[22m[2m │ gzip:   611.97 kB[22m
+[2m../../out/web/[22m[36massets/App-PeSCArZb.js                                    [39m[1m[33m3,424.39 kB[39m[22m[2m │ gzip: 1,017.05 kB[22m
+[2m../../out/web/[22m[36massets/scroll-cache-1nq3dkwm.js                           [39m[1m[33m4,505.29 kB[39m[22m[2m │ gzip: 1,202.48 kB[22m
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[32m✓ built in 1m 24s[39m
+
+> orca@1.4.153-rc.3 ensure:electron-runtime D:\a\orca\orca\orca-src
+> node config/scripts/ensure-native-runtime.mjs --runtime=electron
+
+  • electron-builder  version=26.15.3 os=10.0.26100
+  • Implicit publishing triggered by CI detection. This behavior will be disabled in electron-builder v27. Please use --publish explicitly.
+  • loaded configuration  file=D:\a\orca\orca\orca-src\config\electron-builder.config.cjs
+  • @electron/rebuild already used by electron-builder, please consider to remove excess dependency from devDependencies
+
+To ensure your native dependencies are always matched electron version, simply add script `"postinstall": "electron-builder install-app-deps" to your `package.json`
+[rebuild] Skipping optional Electron rebuild modules: cpu-features
+[rebuild] Forcing native rebuild for win32-x64.
+[rebuild] Restored node-pty ConPTY runtime files for win10-x64.
+  • packaging       platform=win32 arch=x64 electron=43.1.0 appOutDir=dist\win-unpacked
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=D:\a\orca\orca\orca-src\dist\win-unpacked
+  • updating asar integrity executable resource  executablePath=dist\win-unpacked\Orca.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\ssh2\util\pagent.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\third_party\conpty\1.23.251008001\win10-x64\OpenConsole.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\third_party\conpty\1.23.251008001\win10-arm64\OpenConsole.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\prebuilds\win32-x64\winpty-agent.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\prebuilds\win32-x64\conpty\OpenConsole.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\prebuilds\win32-arm64\winpty-agent.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\prebuilds\win32-arm64\conpty\OpenConsole.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\build\Release\winpty-agent.exe
+  • signing with signtool.exe  path=dist\win-unpacked\resources\node_modules\node-pty\build\Release\conpty\OpenConsole.exe
+[verify-packaged-daemon-entry] OK — packaged daemon-entry loads under plain Node
+  • signing with signtool.exe  path=dist\win-unpacked\Orca.exe
+  • building        target=nsis file=dist\orca-windows-setup.exe archs=x64 oneClick=true perMachine=false
+  • downloaded      label=nsis-3.0.4.1.7z progress=100%
+  • downloaded      label=7zip-win-x64.tar.gz progress=100%
+  • signing with signtool.exe  path=dist\win-unpacked\resources\elevate.exe
+  • downloaded      label=nsis-resources-3.4.1.7z progress=100%
+  • signing with signtool.exe  path=dist\orca-windows-setup.__uninstaller.exe
+  • signing with signtool.exe  path=dist\orca-windows-setup.exe
+  • building block map  blockMapFile=dist\orca-windows-setup.exe.blockmap
+  ⨯ Cannot cleanup: 
+
+Error #1 --------------------------------------------------------------------------------
+Error: GitHub Personal Access Token is not set, neither programmatically, nor using env "GH_TOKEN"
+    at new GitHubPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\electron-publish@26.15.3\node_modules\electron-publish\src\gitHubPublisher.ts:55:15)
+    at createPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:347:14)
+    at PublishManager.getOrCreatePublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:233:19)
+    at PublishManager.scheduleUpload (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:163:23)
+    at PublishManager.artifactCreatedWithoutExplicitPublishConfig (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:213:9)
+
+Error #2 --------------------------------------------------------------------------------
+Error: GitHub Personal Access Token is not set, neither programmatically, nor using env "GH_TOKEN"
+    at new GitHubPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\electron-publish@26.15.3\node_modules\electron-publish\src\gitHubPublisher.ts:55:15)
+    at createPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:347:14)
+    at PublishManager.getOrCreatePublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:233:19)
+    at PublishManager.scheduleUpload (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:163:23)
+    at PublishManager.artifactCreatedWithoutExplicitPublishConfig (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:213:9)  failedTask=build stackTrace=Error: Cannot cleanup: 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Error #1 --------------------------------------------------------------------------------
+Error: GitHub Personal Access Token is not set, neither programmatically, nor using env "GH_TOKEN"
+    at new GitHubPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\electron-publish@26.15.3\node_modules\electron-publish\src\gitHubPublisher.ts:55:15)
+    at createPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:347:14)
+    at PublishManager.getOrCreatePublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:233:19)
+    at PublishManager.scheduleUpload (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:163:23)
+    at PublishManager.artifactCreatedWithoutExplicitPublishConfig (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:213:9)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Error #2 --------------------------------------------------------------------------------
+Error: GitHub Personal Access Token is not set, neither programmatically, nor using env "GH_TOKEN"
+    at new GitHubPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\electron-publish@26.15.3\node_modules\electron-publish\src\gitHubPublisher.ts:55:15)
+    at createPublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:347:14)
+    at PublishManager.getOrCreatePublisher (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:233:19)
+    at PublishManager.scheduleUpload (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:163:23)
+    at PublishManager.artifactCreatedWithoutExplicitPublishConfig (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:213:9)
+    at throwError (D:\a\orca\orca\orca-src\node_modules\.pnpm\builder-util@26.15.3\node_modules\builder-util\src\asyncTaskManager.ts:88:11)
+    at checkErrors (D:\a\orca\orca\orca-src\node_modules\.pnpm\builder-util@26.15.3\node_modules\builder-util\src\asyncTaskManager.ts:53:9)
+    at AsyncTaskManager.awaitTasks (D:\a\orca\orca\orca-src\node_modules\.pnpm\builder-util@26.15.3\node_modules\builder-util\src\asyncTaskManager.ts:58:5)
+    at PublishManager.awaitTasks (D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\publish\PublishManager.ts:247:28)
+    at D:\a\orca\orca\orca-src\node_modules\.pnpm\app-builder-lib@26.15.3_dmg_c5739d9600ac3f98a55503c35c5a46a9\node_modules\app-builder-lib\src\index.ts:151:32
+    at executeFinally (D:\a\orca\orca\orca-src\node_modules\.pnpm\builder-util@26.15.3\node_modules\builder-util\src\promise.ts:23:9)
+ ELIFECYCLE  Command failed with exit code 1.
