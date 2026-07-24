@@ -162,6 +162,7 @@ export function NativeChatComposerField({
                 ))}
               </div>
             ) : null}
+            {/* Keep prompt direction local to its content; the application chrome remains LTR. */}
             <textarea
               dir="auto"
               ref={textareaRef}
