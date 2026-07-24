@@ -15,12 +15,299 @@ concurrency:
 
 jobs:
   verify:
-    uses: ./.github/workflows/rtl-verify.yml
-    permissions:
-      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+
+    steps:
+      - name: Check out RTL branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/native-chat-rtl
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install native build tools
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3 zlib1g-dev zsh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Use external node-gyp on Linux
+        run: |
+          npm install -g node-gyp@11.5.0
+          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
+
+      - name: Prepare dependency install
+        run: |
+          if [ -e node_modules ]; then
+            ls -ld node_modules
+            rm -rf node_modules
+          fi
+
+      - name: Install dependencies
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
+
+      - name: Lint
+        run: pnpm exec oxlint --format github
+
+      - name: Check styled scrollbars
+        run: pnpm check:styled-scrollbars
+
+      - name: Check reliability gate manifest
+        run: pnpm run check:reliability-gates
+
+      - name: Enforce max-lines ratchet
+        run: pnpm run check:max-lines-ratchet
+
+      - name: Verify bundled skill guides
+        run: pnpm run verify:bundled-skill-guides
+
+      # The freshness manifest derives official identities from the canonical
+      # repository's release graph, so it is intentionally omitted in this fork.
+      - name: Guard against project-owned .d.ts in preload/shared
+        run: |
+          matches=$(find src/preload src/shared -name '*.d.ts' 2>/dev/null || true)
+          if [ -n "$matches" ]; then
+            echo "::error::Project-owned .d.ts files are not allowed under src/preload or src/shared."
+            echo "$matches"
+            exit 1
+          fi
+
+      - name: Check feature wall asset budget
+        run: pnpm check:feature-wall-assets
+
+      - name: Verify macOS entitlements
+        run: pnpm verify:macos-entitlements
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Verify Git binary compatibility matrix
+        run: |
+          archive="$RUNNER_TEMP/git-2.25.5.tar.gz"
+          source="$RUNNER_TEMP/git-2.25.5"
+          curl -fsSL https://www.kernel.org/pub/software/scm/git/git-2.25.5.tar.gz -o "$archive"
+          echo "41662c52fc16fec4963bfc41075e71f8ead6b5e386797eb6f9a1111ff95a8ddf  $archive" | sha256sum --check
+          mkdir -p "$source"
+          tar -xzf "$archive" -C "$source" --strip-components=1
+          make -C "$source" -j2 NO_GETTEXT=YesPlease NO_TCLTK=YesPlease NO_PYTHON=YesPlease git
+          ORCA_GIT_COMPAT_BINARY="$source/git" ORCA_GIT_COMPAT_VERSION="2.25.5" \
+            pnpm exec vitest run --config config/vitest.config.ts src/shared/git-binary-compatibility.test.ts
+
+          for spec in \
+            "alpine/git:edge-2.38.1|2.38.1" \
+            "alpine/git:v2.49.1|2.49.1"; do
+            image="${spec%%|*}"
+            version="${spec#*|}"
+            ORCA_GIT_COMPAT_IMAGE="$image" ORCA_GIT_COMPAT_VERSION="$version" \
+              pnpm exec vitest run --config config/vitest.config.ts src/shared/git-binary-compatibility.test.ts
+          done
+
+      - name: Rebuild better-sqlite3 for Node
+        run: pnpm rebuild better-sqlite3
+
+      - name: Install Electron package binary for tests
+        run: node config/scripts/install-electron-package-binary.mjs
+
+      - name: Test
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee "$RUNNER_TEMP/orca-rtl-test.log"
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rtl-test-log-${{ github.run_id }}
+          path: ${{ runner.temp }}/orca-rtl-test.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build unpacked app
+        run: pnpm build:unpack
+
+      - name: Smoke packaged CLI
+        run: node config/scripts/smoke-packaged-cli.mjs --app-dir=dist/linux-unpacked
 
   build:
     needs: verify
-    uses: ./.github/workflows/build-rtl-windows.yml
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+    steps:
+      - name: Check out RTL branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/native-chat-rtl
+          fetch-depth: 0
+
+      - name: Record source revision
+        id: source
+        shell: pwsh
+        run: |
+          "sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+          "short_sha=$(git rev-parse --short HEAD)" >> $env:GITHUB_OUTPUT
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.24.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
+          git diff --exit-code package.json pnpm-lock.yaml
+
+      - name: Build native Windows helpers
+        shell: pwsh
+        run: pnpm run build:native
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: pnpm run build:win
+
+      - name: Prepare release files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          $installer = Get-ChildItem -Path dist -Recurse -File -Filter "orca-windows-setup.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Could not find dist/orca-windows-setup.exe"
+          }
+          Copy-Item $installer.FullName release/orca-rtl-windows-setup.exe
+          $hash = (Get-FileHash release/orca-rtl-windows-setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  orca-rtl-windows-setup.exe" | Set-Content -Encoding ascii release/orca-rtl-windows-setup.exe.sha256
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: orca-rtl-windows-${{ steps.source.outputs.short_sha }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish rolling latest release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RTL_SHA: ${{ steps.source.outputs.sha }}
+          RTL_SHORT_SHA: ${{ steps.source.outputs.short_sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          git tag -f rtl-latest $env:RTL_SHA
+          git push origin refs/tags/rtl-latest --force
+
+          $notes = @"
+          Automated unsigned Windows build of Orca with content-level RTL support for Native Chat.
+
+          Source branch: ``fix/native-chat-rtl``
+          Source commit: ``$env:RTL_SHA``
+
+          Download ``orca-rtl-windows-setup.exe`` below. Windows SmartScreen may warn because this community build is not signed with Orca's official certificate.
+          "@
+
+          gh release view rtl-latest *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit rtl-latest `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease
+            gh release upload rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --clobber
+          } else {
+            $global:LASTEXITCODE = 0
+            gh release create rtl-latest `
+              release/orca-rtl-windows-setup.exe `
+              release/orca-rtl-windows-setup.exe.sha256 `
+              --title "Orca RTL for Windows — latest ($env:RTL_SHORT_SHA)" `
+              --notes $notes `
+              --prerelease `
+              --target $env:RTL_SHA
+          }
+
+  report:
+    needs:
+      - verify
+      - build
+    if: always()
+    runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Record workflow result on rtl-ci-status branch
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin fix/native-chat-rtl
+          rtl_sha=$(git rev-parse origin/fix/native-chat-rtl)
+
+          if [[ "$VERIFY_RESULT" == "success" && "$BUILD_RESULT" == "success" ]]; then
+            conclusion=success
+          else
+            conclusion=failure
+          fi
+
+          if git ls-remote --exit-code --heads origin rtl-ci-status >/dev/null 2>&1; then
+            git fetch origin rtl-ci-status
+            git switch -C rtl-ci-status origin/rtl-ci-status
+          else
+            git switch -c rtl-ci-status origin/main
+          fi
+
+          mkdir -p .github
+          timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          cat > .github/rtl-ci-status.json <<EOF
+          {
+            "sha": "$rtl_sha",
+            "conclusion": "$conclusion",
+            "verify": "$VERIFY_RESULT",
+            "build": "$BUILD_RESULT",
+            "run_id": "$RUN_ID",
+            "run_attempt": "$RUN_ATTEMPT",
+            "run_url": "$RUN_URL",
+            "updated_at": "$timestamp"
+          }
+          EOF
+
+          git add .github/rtl-ci-status.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "ci: record RTL workflow $conclusion for $rtl_sha"
+          git push origin HEAD:rtl-ci-status
