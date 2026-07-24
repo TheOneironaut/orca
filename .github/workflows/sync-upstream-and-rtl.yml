@@ -74,14 +74,8 @@ jobs:
           git remote add upstream https://github.com/stablyai/orca.git 2>/dev/null || \
             git remote set-url upstream https://github.com/stablyai/orca.git
           git fetch upstream main
-
-          if git merge-base --is-ancestor upstream/main origin/main; then
-            git reset --hard origin/main
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           git reset --hard upstream/main
+
           mkdir -p .github/workflows
           cp "$OVERLAY_PATH"/.github/workflows/*.yml .github/workflows/
 
@@ -122,6 +116,13 @@ jobs:
             .github/workflows/rtl-verify.yml \
             .github/workflows/sync-upstream-and-rtl.yml
           git diff --cached --check
+
+          if git diff --cached --quiet origin/main --; then
+            git reset --hard origin/main
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           git commit -m "chore: sync upstream and preserve RTL automation"
           git push origin HEAD:main \
             --force-with-lease=refs/heads/main:$OLD_MAIN_SHA
