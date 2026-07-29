@@ -14,6 +14,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/build.yml
       - patches/native-chat-rtl.patch
 
 permissions:
